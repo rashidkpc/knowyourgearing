@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="./style/mini-nord.css">
+  <style>
+    input,
+    select {
+      width: 95%;
+    }
+  </style>
+  <title>Know Your Gearing</title>
+</head>
+
+<body>
+  <div id="app">
+    <h1 style="text-align:center;">Bicycle Gear Inch Calculator</h1>
+
+    <fieldset>
+      <legend>Your Bike</legend>
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-6 col-md-3">
+            <label for="wheelDiameter">Wheel Diameter</label>
+            <input type="text" id="wheelDiameter" value="10" />
+          </div>
+          <div class="col-sm-6 col-md-3">
+            <label for="frontTeeth">Chain ring</label>
+            <input type="text" id="frontTeeth" value="0" />
+          </div>
+          <div class="col-sm-6 col-md-3">
+            <label for="rearTeeth">Material (g)</label>
+            <input type="text" id="rearTeeth" value="3.5" />
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="container">
+      <div id="results"></div>
+    </div>
+  </div>
+
+  <script type="module">
+      import {createTable} from './scripts/index.js';
+
+      (function app() {
+
+      // create map of values and input ids
+      const inputMap = {
+        wheelDiameter: '#wheelDiameter',
+        frontTeeth: '#frontTeeth',
+        rearTeeth: '#rearTeeth'
+      };
+
+      // cache input selectors
+      const inputs = Object.keys(inputMap).reduce((acc, name) => {
+        const val = document.querySelector(inputMap[name]);
+        acc[name] = val;
+        return acc;
+      }, {});
+
+      // helper functions
+      function round(val, dec = 2) {
+        const mult = Math.pow(10, dec);
+        return Math.round(val * mult) / mult;
+      }
+
+      function saveForm() {
+        const data = Object.entries(inputs).reduce((acc, [name, input]) => {
+          acc[name] = input.value;
+          return acc;
+        }, {});
+
+        localStorage.setItem('data', JSON.stringify(data));
+      }
+
+      function restoreForm() {
+        const data = JSON.parse(localStorage.getItem('data') || '{}');
+        Object.entries(data).forEach(([name, value]) => {
+          console.log(name);
+          inputs[name].value = value;
+        });
+      }
+
+      // recalculate form values on change
+      function handleChange() {
+        // persist inputs to localstorage
+        saveForm();
+
+        const resultsElem = document.querySelector('#results');
+
+        resultsElem.innerHTML = '';
+        resultsElem.appendChild(createTable([[1,2,3],[4,5,6]]));
+
+      }
+
+      // listen for changes on all inputs
+      document.querySelectorAll('#app input').forEach(el => {
+        el.addEventListener('keyup', (ev) => handleChange(el, ev));
+      });
+
+      // listen for changes on all selects
+      document.querySelectorAll('#app select').forEach(el => {
+        el.addEventListener('change', (ev) => handleChange(el, ev));
+      });
+
+      // restore input values
+      restoreForm();
+
+      console.log('exit');
+      return;
+
+      // update form on load
+      // handleChange();
+    })();
+
+  </script>
+</body>
+
+</html>

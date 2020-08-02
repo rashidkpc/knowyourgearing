@@ -1,0 +1,19 @@
+{
+  "name": "dosing-calc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "serve -s dist",
+    "deploy": "firebase deploy"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^7.6.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-recommended": "^4.1.0",
+    "eslint-plugin-import": "^2.22.0",
+    "firebase-tools": "^7.0.2",
+    "serve": "^11.3.2"
+  }
+}
