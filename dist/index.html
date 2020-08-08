@@ -5,7 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="./style/mini-nord.css">
+  <link rel="stylesheet" href="./style/mini-default.css">
+  <link rel="stylesheet" href="./style/custom.css">
+  <script type="module" src="./scripts/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.5.0/dist/alpine.min.js" defer></script>
+
   <style>
     input,
     select {
@@ -16,109 +20,132 @@
 </head>
 
 <body>
-  <div id="app">
+  <div id="app" x-data="{...app}">
     <h1 style="text-align:center;">Bicycle Gear Inch Calculator</h1>
-
+    <div class="container">
+      <p><strong>What are gear inches?</strong> The origin of the phrase doesn't really matter*. What matters is that gear inches describe, in abstract, how far the bike travels for each revolution of the crank in a given gear combination. A low gear inch number will make climbing hills easier and a large gear inch number will make it possible to obtain higher speeds without spinning the pedals like crazy. </p>
+      <p><strong>What are some recommended gear inch values?</strong> It depends how strong of a rider you are, what sort of terrain you'll be covering, and if you will be carrying a bunch of stuff with you. Ball park? 20" on the low end, 100" on the high is a reasonable range. The low of 20" will get even beginners up most hills, while the 100" high will have you cruising along at 27mph while spinning at 90rpm. The calculator is preconfigured with this reasonable range in mind.</p>
+    </div>
     <fieldset>
       <legend>Your Bike</legend>
       <div class="container">
         <div class="row">
           <div class="col-sm-6 col-md-3">
-            <label for="wheelDiameter">Wheel Diameter</label>
-            <input type="text" id="wheelDiameter" value="10" />
+            <label>Wheel Size</label>
+            <select x-model.number="state.wheelDiameter">
+              <template 
+              x-for="[text, value] in Object.entries(sizes.wheels)"
+              :key="value"
+              >
+                <option 
+                  x-bind:selected="value == state.wheelDiameter" 
+                  x-bind:value="value" 
+                  x-text="text"></option>
+              </template>
+            </select>
           </div>
           <div class="col-sm-6 col-md-3">
-            <label for="frontTeeth">Chain ring</label>
-            <input type="text" id="frontTeeth" value="0" />
+            <label>Min Chainring</label>
+            <select x-model.number="state.minRing">
+              <template 
+              x-for="teeth in calculate.getRange(5,state.maxRing)"
+              :key="teeth"
+              >
+                <option 
+                  x-bind:selected="teeth == state.minRing" 
+                  x-bind:value="teeth" 
+                  x-text="teeth"></option>
+              </template>
+            </select>
           </div>
           <div class="col-sm-6 col-md-3">
-            <label for="rearTeeth">Material (g)</label>
-            <input type="text" id="rearTeeth" value="3.5" />
+            <label>Min Cog</label>
+            <select x-model.number="state.minCog">
+              <template 
+              x-for="teeth in calculate.getRange(5,state.maxCog)"
+              :key="teeth"
+              >
+                <option 
+                  x-bind:selected="teeth == state.minCog" 
+                  x-bind:value="teeth" 
+                  x-text="teeth"></option>
+              </template>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-6 col-md-3">
+            <label>Tire Size</label>
+            <select x-model.number="state.tireSize">
+              <template 
+              x-for="[text, value] in Object.entries(sizes.tires)"
+              :key="value"
+              >
+                <option 
+                  x-bind:selected="value == state.tireSize" 
+                  x-bind:value="value"  
+                  x-text="text"></option>
+              </template>
+            </select>
+          </div>
+          <div class="col-sm-6 col-md-3">
+            <label>Max Chainring</label>
+            <select x-model.number="state.maxRing">
+              <template 
+              x-for="teeth in calculate.getRange(state.minRing,100)"
+              :key="teeth"
+              >
+                <option 
+                  x-bind:selected="teeth == state.maxRing" 
+                  x-bind:value="teeth" 
+                  x-text="teeth"></option>
+              </template>
+            </select>
+          </div>
+          <div class="col-sm-6 col-md-3">
+            <label>Max Cog</label>
+            <select x-model.number="state.maxCog">
+              <template 
+              x-for="teeth in calculate.getRange(state.minCog,100)"
+              :key="teeth"
+              >
+                <option 
+                  x-bind:selected="teeth == state.maxCog" 
+                  x-bind:value="teeth" 
+                  x-text="teeth"></option>
+              </template>
+            </select>
           </div>
         </div>
       </div>
     </fieldset>
 
-    <div class="container">
-      <div id="results"></div>
-    </div>
+    <fieldset id="results">
+      <legend>Gear Inches</legend>
+      <table>
+        <thead>
+          <th style="padding-top:0px;">Ring<br>Cog</th>
+          <template x-for="ring in calculate.getRange(state.minRing, state.maxRing)">
+            <th x-text="ring"></th>
+          </template>
+        </thead>
+        <tbody>
+          <template x-for="cog in calculate.getRange(state.minCog, state.maxCog)">
+            <tr>
+              <th x-text="cog" class="header"></th>
+              <template x-for="ring in calculate.getRange(state.minRing, state.maxRing)">
+                <td x-text="text = calculate.getGearInches(calculate.getWheelAndTireToDiameter(state.wheelDiameter,state.tireSize), ring, cog)">
+                </td>
+              </template>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </fieldset>
+
+
   </div>
-
-  <script type="module">
-      import {createTable} from './scripts/index.js';
-
-      (function app() {
-
-      // create map of values and input ids
-      const inputMap = {
-        wheelDiameter: '#wheelDiameter',
-        frontTeeth: '#frontTeeth',
-        rearTeeth: '#rearTeeth'
-      };
-
-      // cache input selectors
-      const inputs = Object.keys(inputMap).reduce((acc, name) => {
-        const val = document.querySelector(inputMap[name]);
-        acc[name] = val;
-        return acc;
-      }, {});
-
-      // helper functions
-      function round(val, dec = 2) {
-        const mult = Math.pow(10, dec);
-        return Math.round(val * mult) / mult;
-      }
-
-      function saveForm() {
-        const data = Object.entries(inputs).reduce((acc, [name, input]) => {
-          acc[name] = input.value;
-          return acc;
-        }, {});
-
-        localStorage.setItem('data', JSON.stringify(data));
-      }
-
-      function restoreForm() {
-        const data = JSON.parse(localStorage.getItem('data') || '{}');
-        Object.entries(data).forEach(([name, value]) => {
-          console.log(name);
-          inputs[name].value = value;
-        });
-      }
-
-      // recalculate form values on change
-      function handleChange() {
-        // persist inputs to localstorage
-        saveForm();
-
-        const resultsElem = document.querySelector('#results');
-
-        resultsElem.innerHTML = '';
-        resultsElem.appendChild(createTable([[1,2,3],[4,5,6]]));
-
-      }
-
-      // listen for changes on all inputs
-      document.querySelectorAll('#app input').forEach(el => {
-        el.addEventListener('keyup', (ev) => handleChange(el, ev));
-      });
-
-      // listen for changes on all selects
-      document.querySelectorAll('#app select').forEach(el => {
-        el.addEventListener('change', (ev) => handleChange(el, ev));
-      });
-
-      // restore input values
-      restoreForm();
-
-      console.log('exit');
-      return;
-
-      // update form on load
-      // handleChange();
-    })();
-
-  </script>
+  <footer>*Gear inches are a concept left over from those ol' timey big wheel bikes (aka, the penny-farthing). Gear inches refers to the diameter of the big wheel. Since penny farthings had no gears the wheel would revolve once for every revolution of the crank. Of course, now we have gears, but we still use gear inches to describe the virtual wheel. </footer>
 </body>
 
 </html>

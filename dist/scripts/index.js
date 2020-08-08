@@ -1,5 +1,9 @@
-import { createTable } from './table.js';
+import sizes from './sizes.js';
+import calculate from './calculate.js';
+import state from './state.js';
 
-export {
-  createTable,
+window.app = {
+  sizes,
+  calculate,
+  state,
 };

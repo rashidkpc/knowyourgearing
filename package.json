@@ -1,8 +1,8 @@
 {
-  "name": "dosing-calc",
+  "name": "knowgears",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "Creative Commons Attribution NonCommercial NoDerivs (CC-NC-ND)",
   "scripts": {
     "dev": "serve -s dist",
     "deploy": "firebase deploy"

@@ -1,0 +1,22 @@
+#results table {
+    overflow: initial;
+    max-height: initial;
+}
+
+#results table td, #results table th {
+    font-size: 12px;
+    padding: 5px;
+    text-overflow: initial;
+}
+
+td.low {
+    background-color: #BBD8CE;
+}
+
+td.mid {
+    background-color: #B9CACB
+}
+
+td.high {
+    background-color: #E4ADA6;
+}
